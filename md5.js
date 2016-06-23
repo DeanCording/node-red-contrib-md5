@@ -20,6 +20,8 @@
  * SOFTWARE.
  **/
 
+const util = require('util');
+
 module.exports = function(RED) {
     "use strict";
     var md5 = require("md5");
@@ -29,30 +31,31 @@ module.exports = function(RED) {
         var node = this;
 
         node.name = n.name;
-        node.fieldToHash = n.fieldToHash;
-        node.fieldTypeToHash = n.fieldTypeToHash;
-        node.hashField = n.hashField;
-        node.hashFieldType = n.hashFieldType;
-
+        node.fieldToHash = n.fieldToHash || "payload";
+        node.fieldTypeToHash = n.fieldTypeToHash || "msg";
+        node.hashField = n.hashField  || "md5";
+        node.hashFieldType = n.hashFieldType || "msg";
         node.on("input", function(msg) {
 
-            var hash;
+            var hash = "";
 
-            if (node.fieldToHashType === 'msg') {
-                value = md5(RED.util.getMessageProperty(msg,node.fieldToHash).toString());
-            } else if (node.fieldToHashType === 'flow') {
-                value = md5(node.context().flow.get(node.fieldToHash).toString());
-            } else if (node.fieldToHashType === 'global') {
-                value = node.context().global.get(node.fieldToHash).toString());
+            if (node.fieldTypeToHash === 'msg') {
+                hash = md5(RED.util.getMessageProperty(msg,node.fieldToHash).toString());
+            } else if (node.fieldTypeToHash === 'flow') {
+                hash = md5(node.context().flow.get(node.fieldToHash).toString());
+            } else if (node.fieldTypeToHash === 'global') {
+                hash = md5(node.context().global.get(node.fieldToHash).toString());
             }
 
             if (node.hashFieldType === 'msg') {
-                RED.util.setMessageProperty(msg,node.hashField,value);
+                RED.util.setMessageProperty(msg,node.hashField,hash);
             } else if (node.hashFieldType === 'flow') {
-                node.context().flow.set(node.hashField,value);
+                node.context().flow.set(node.hashField,hash);
             } else if (node.hashFieldType === 'global') {
-                node.context().global.set(node.hashField,value);
+                node.context().global.set(node.hashField,hash);
             }
+
+            node.send(msg);
 
         });
     }
