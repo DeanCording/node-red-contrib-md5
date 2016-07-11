@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-md5",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A node-red node to calculate an MD5 hash for a message property.",
   "dependencies": {
     "md5": "2.1.*"
