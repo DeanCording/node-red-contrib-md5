@@ -21,7 +21,6 @@
  **/
 
 const util = require('util');
-isBuffer = require('is-buffer');
 
 module.exports = function(RED) {
     "use strict";
@@ -38,15 +37,7 @@ module.exports = function(RED) {
         node.hashFieldType = n.hashFieldType || "msg";
         node.on("input", function(msg) {
 
-            var hash = "";
-
-            if (node.fieldTypeToHash === 'msg') {
-                hash = md5(RED.util.getMessageProperty(msg,node.fieldToHash));
-            } else if (node.fieldTypeToHash === 'flow') {
-                hash = md5(node.context().flow.get(node.fieldToHash));
-            } else if (node.fieldTypeToHash === 'global') {
-                hash = md5(node.context().global.get(node.fieldToHash));
-            }
+            var hash = md5(RED.util.evaluateNodeProperty(node.fieldToHash,node.fieldTypeToHash,node,msg));
 
             if (node.hashFieldType === 'msg') {
                 RED.util.setMessageProperty(msg,node.hashField,hash);
